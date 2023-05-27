@@ -13,10 +13,18 @@ import { Link } from "react-router-dom";
 
 // @svg
 import { CartIcon } from "../../assets/svg";
+import { useSelector, useDispatch } from "react-redux";
+import { addItem, deleteItem } from "../../Redux/actions/cartAction";
 
 const Product = () => {
   const [loading, setLoading] = useState(false);
   const [listProducts, setListProducts] = useState([]);
+
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+  const dispatch = useDispatch();
+  const { dataCart } = useSelector((state) => state);
+  // console.log("store", dataCart);
 
   useEffect(() => {
     fetchGetListProducts();
@@ -35,7 +43,14 @@ const Product = () => {
       );
       if (data.retCode === 0) {
         const list = data.retData.products.reverse();
-        setListProducts(list);
+        const listProducts = list.map((item) => {
+          return {
+            ...item,
+            quantity: 1,
+            totalPrice: item.price,
+          };
+        });
+        setListProducts(listProducts);
       }
     } catch (err) {
       console.log("FETCH FAIL!", err);
@@ -67,10 +82,6 @@ const Product = () => {
   const openShopping = document.querySelector(".shopping");
   const closeShopping = document.querySelector(".closeShopping");
   const body = document.querySelector("body");
-  let list = document.querySelector(".list");
-  let listCard = document.querySelector(".listCard");
-  let total = document.querySelector(".total");
-  let quantity = document.querySelector(".quantity");
 
   openShopping?.addEventListener("click", () => {
     body.classList.add("active");
@@ -80,54 +91,21 @@ const Product = () => {
     body.classList.remove("active");
   });
 
-  let listCards = [];
-  function addToCard(key) {
-    if (listCards[key] == null) {
-      // copy product form list to list card
-      listCards[key] = JSON.parse(JSON.stringify(listProducts[key]));
-      listCards[key].quantity = 1;
-    }
-    console.log("listCards", listCards);
-    reloadCard();
-  }
-  function reloadCard() {
-    listCard.innerHTML = "";
-    let count = 0;
-    let totalPrice = 0;
-    listCards.forEach((value, key) => {
-      totalPrice = totalPrice + value.price;
-      count = count + value.quantity;
-      if (value != null) {
-        let newDiv = document.createElement("li");
-        newDiv.innerHTML = `
-                <div><img src="${value.image}"/></div>
-                <div>${value.name}</div>
-                <div>${value.price.toLocaleString()}</div>
-                <div>
-                   <button onclick="changeQuantity(${key}, ${
-          value.quantity - 1
-        })">-</button>
-                    <div class="count">${value.quantity}</div>
-                    <button onclick="changeQuantity(${key}, ${
-          value.quantity + 1
-        })">+</button>
-                </div>`;
-        listCard.appendChild(newDiv);
-      }
+  const handleTotalMoney = () => {
+    const listPrice = dataCart?.map((item) => {
+      return item.totalPrice;
     });
-    total.innerText = totalPrice.toLocaleString();
-    quantity.innerText = count;
-  } //changeQuantity(${key}, ${value.quantity - 1})
-  function changeQuantity(key, quantity) {
-    // if (quantity == 0) {
-    //   delete listCards[key];
-    // } else {
-    //   listCards[key].quantity = quantity;
-    //   listCards[key].price = quantity * listProducts[key].price;
-    // }
-    // reloadCard();
-    console.log("hihi");
-  }
+    if (listPrice?.length === 0) {
+      return 0;
+    } else {
+      const res =
+        listPrice.reduce((total, currentValue) => {
+          return total + currentValue;
+        }) ?? 0;
+      return res;
+    }
+  };
+
   return (
     <React.Fragment>
       <div className="content-header">
@@ -149,10 +127,37 @@ const Product = () => {
           <div className="content-header-box-center">
             <img
               src="https://www.couvee.co.id/wp-content/themes/couvee/assets/images/logo-text.png"
-              alt="img-logo"
+              alt="img-logo" 
+              style={{
+                cursor: "pointer", paddingLeft:"220px",
+              }}
             />
           </div>
           <div className="content-header-box-right">
+            {userInfo && Object.keys(userInfo)?.length > 0 ? (
+              <p
+                style={{
+                  cursor: "pointer", paddingTop: "20px", paddingRight: "130px"
+                }}
+                onClick={() => {
+                  localStorage.removeItem("userInfo");
+                  setTimeout(() => {
+                    window.location.href = "/login";
+                  }, 1000);
+                }}
+              >
+                Logout
+              </p>
+            ) : (
+              <p
+                style={{
+                  cursor: "pointer", paddingTop: "20px", paddingRight: "130px"
+                }}
+                onClick={() => (window.location.href = "/login")}
+              >
+                Login
+              </p>
+            )}
             <div className="burger">
               <i className="fa-solid fa-bars" onClick={() => openNav()}></i>
             </div>
@@ -160,7 +165,7 @@ const Product = () => {
               <div>
                 <CartIcon />
               </div>
-              <span className="quantity">0</span>
+              <span className="quantity">{dataCart?.length}</span>
             </div>
           </div>
         </div>
@@ -196,33 +201,39 @@ const Product = () => {
           </div>
 
           <div className="content-body-item">
-            {listProducts?.map((item, index) => {
-              return (
-                <div
-                  className="content-body-item-product"
-                  key={`${index}-${item?._id}`}
-                >
-                  <img
-                    src={item?.image}
-                    alt="product"
-                    className="product-item"
-                  />
-                  <p className="product-item-title">{item?.name}</p>
-                  <div className="product-item-content">
-                    <div className="price">
-                      <p className="product-item-price">{item?.price}$</p>
-                    </div>
-                    <div className="cart" onClick={() => addToCard(index)}>
-                      <a
-                        href="#"
-                        className="fa-solid fa-cart-shopping"
-                        style={{ color: "black" }}
-                      ></a>
+            <div className="row">
+              {listProducts?.map((item, index) => {
+                return (
+                  <div className="col-4 p-2" key={`${index}-${item?._id}`}>
+                    <div className="content-body-item-product">
+                      <img
+                        src={item?.image}
+                        alt="product"
+                        className="product-item"
+                      />
+                      <p className="product-item-title">{item?.name}</p>
+                      <div className="product-item-content">
+                        <div className="price">
+                          <p className="product-item-price">{item?.price}$</p>
+                        </div>
+                        <div
+                          className="cart"
+                          onClick={() => {
+                            dispatch(addItem(item));
+                          }}
+                        >
+                          <a
+                            href="#"
+                            className="fa-solid fa-cart-shopping"
+                            style={{ color: "black" }}
+                          ></a>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -280,44 +291,60 @@ const Product = () => {
         <nav className="overlay-menu">
           <Link to="/"> HOMEPAGE </Link>
           <Link to="/Product">MENU</Link>
-          <Link to="/">LOGIN</Link>
-          <Link to="/">REGISTER</Link>
+          <Link to="/Login">LOGIN</Link>
+          <Link to="/Register">REGISTER</Link>
           <Link to="/">CONTACT</Link>
         </nav>
       </div>
       <div className="card">
         <h1>Cart</h1>
         <ul className="listCard">
-          {/* {cartList?.map((value, index) => {
+          {dataCart?.map((value, index) => {
             return (
-              <div className="listCard-item" key={index}>
-                <div className="listCard-item-img">
-                  <img src={value?.image} className="card-img" />
+              <li key={index}>
+                <div>
+                  <img src={value.image} alt="" />
                 </div>
-                <div className="listCard-item-name">
-                  <h4>{value?.name}</h4>
-                </div>
-                <div className="listCard-item-price">
-                  <h4>{value?.totalPrice}</h4>
-                </div>
-                <div className="listCard-item-price">
-                  <h4>x{value?.totalItem}</h4>
-                </div>
-                <div className="listCard-item-quantity">
-                  <button onClick={() => handleIncrease(value, "increase")}>
-                    +
-                  </button>
-                  <button onClick={() => handleDecrease(value, "decrease")}>
+                <div>{value.name}</div>
+                <div>{value.totalPrice.toLocaleString()}</div>
+                <div>
+                  <button
+                    onClick={() => {
+                      const itemExistDelete = dataCart?.find(
+                        (item) => item?._id === value._id
+                      );
+                      if (
+                        itemExistDelete &&
+                        Object.keys(itemExistDelete).length > 0
+                      ) {
+                        dispatch(deleteItem(value));
+                      } else {
+                        return;
+                      }
+                    }}
+                  >
                     -
                   </button>
+                  <div className="count">{value.quantity}</div>
+                  <button
+                    onClick={() => {
+                      dispatch(addItem(value));
+                    }}
+                  >
+                    +
+                  </button>
                 </div>
-              </div>
+              </li>
             );
-          })} */}
+          })}
         </ul>
         <div className="checkOut">
-          <div className="total">0</div>
-          <div className="closeShopping">Checkout</div>
+        <div className="">Total</div>
+          <div className="total">{handleTotalMoney()}</div>
+          <div className="closeShopping">Close</div>
+          <div><Link to="/">Checkout</Link></div>
+          
+        
         </div>
       </div>
     </React.Fragment>

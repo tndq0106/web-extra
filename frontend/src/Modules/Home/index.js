@@ -28,6 +28,10 @@ import Img16 from "../../assets/img/caramel-macciato.jpg";
 import { Link } from "react-router-dom";
 
 const Home = () => {
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+  console.log("userInfo", userInfo);
+
   function openNav() {
     document.getElementById("overlay-menu").style.height = "100%";
   }
@@ -41,7 +45,33 @@ const Home = () => {
         <div className="wrapper">
           <div className="nav">
             <i className="fa-brands fa-instagram"></i>
-            <img src={Img1} alt="" />
+            <img src={Img1} alt="" style={{
+                  cursor: "pointer", marginLeft:"280px", 
+                }}/>
+            {userInfo && Object.keys(userInfo)?.length > 0 ? (
+              <p
+                style={{
+                  cursor: "pointer", paddingTop:"20px"
+                }}
+                onClick={() => {
+                  localStorage.removeItem("userInfo");
+                  setTimeout(() => {
+                    window.location.href = "/login";
+                  }, 1000);
+                }}
+              >
+                Logout
+              </p>
+            ) : (
+              <p
+                style={{
+                  cursor: "pointer", paddingTop:"20px"
+                }}
+                onClick={() => (window.location.href = "/login")}
+              >
+                Login
+              </p>
+            )}
             <i className="fa-solid fa-bars" onClick={() => openNav()}></i>
           </div>
         </div>
@@ -257,8 +287,8 @@ const Home = () => {
         <nav className="overlay-menu">
           <Link to="/"> HOMEPAGE </Link>
           <Link to="/Product">MENU</Link>
-          <Link to="/">LOGIN</Link>
-          <Link to="/">REGISTER</Link>
+          <Link to="/Login">LOGIN</Link>
+          <Link to="/Register">REGISTER</Link>
           <Link to="/">CONTACT</Link>
         </nav>
       </div>
