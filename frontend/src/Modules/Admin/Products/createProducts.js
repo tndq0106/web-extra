@@ -12,7 +12,7 @@ function CreateProduct(){
         description:"",
         price:"",
         image: null,
-        category:"",
+       // category:"",
         stock: "",
         success: false,
         error: false,
@@ -55,7 +55,7 @@ function CreateProduct(){
                     description: "",
                     price: "",
                     stock: "",
-                    category: "",
+                   // category: "",
                     image: "",
                     success: resData.success,
                     error: false,
@@ -67,7 +67,7 @@ function CreateProduct(){
                         description: "",
                         price: "",
                         stock: "",
-                        category: "",
+                      //  category: "",
                         image: "",
                         success: false,
                         error: false,
@@ -82,7 +82,7 @@ function CreateProduct(){
         } catch (error){
             console.log(error);
         }
-        history('/admin');
+       // history('/admin');
     }
 
 
@@ -192,4 +192,5 @@ function CreateProduct(){
         </Fragment>
     );
 }
+
 export default CreateProduct;

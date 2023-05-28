@@ -1,16 +1,19 @@
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import {getProducts, deleteProduct} from "./fetchAPI";
 import { useNavigate, Link } from "react-router-dom";
 import { ProductContext } from "./index";
+import apiURL from './config';
 
-function ProductList(props){
+function AllProduct(props){
     let history = useNavigate();
 
     const { data, dispatch } = useContext(ProductContext);
     const {products} = data;
     const [loading, setLoading] = useState(false);
 
-    uuseEffect(() => {
+    
+
+    useEffect(() => {
         fetchData();
     })
 
@@ -35,6 +38,15 @@ function ProductList(props){
             fetchData();
         }
     }
+
+    const editProduct = (id, product, type) =>{
+        if (type){
+            dispatch({
+                type: "editProductOpen",
+                product: {...product, id:id},
+            });
+        }
+    };
 
     return (
         <Fragment>
@@ -83,11 +95,11 @@ function ProductList(props){
                         : product.name}
                     </td>
                     <td>
-                        {produc.description.slice(0,15)}...
+                        {product.description.slice(0,15)}...
                     </td>
                     <td> //w=h=12px
                         <img src={`${apiURL}/uploads/products/${product.pImages[0]}`}/>
-                    </td>
+                    </td> 
                     <td>{product.price}</td>
                     <td>{product.category.name}</td>
                     <td>{product.stock}</td>
@@ -101,4 +113,4 @@ function ProductList(props){
             </Fragment>
         )
 }
-export default ProductList;
+export default AllProduct;

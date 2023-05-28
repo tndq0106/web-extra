@@ -1,8 +1,9 @@
 import axios from "axios";
+import apiURL from "./config";
 
 export const getProducts = async () => {
     try {
-        let res = await axios.get(`${apiURL}/api/product/all-product`);
+        let res = await axios.get(`${apiURL}/api/products/listProducts`);
         return res.data;
     } catch (error) {
         console.log(error);
@@ -18,7 +19,7 @@ export const createProduct = async({
     name,
     description,
     image,
-    category,
+    //category,
     stock,
     price
 }) => {
@@ -26,7 +27,7 @@ export const createProduct = async({
     formData.append("name", name);
     formData.append("description", description);
     formData.append("image", image);
-    formData.append("category", category);
+   // formData.append("category", category);
     formData.append("stock",stock);
     formData.append("price",price);
 
@@ -41,13 +42,10 @@ export const createProduct = async({
 export const editProduct = async(product) => {
     console.log(product);
     let formData = new FormData();
-    if (product.editImage){
-        formData.append("editImage", file);
-    }
     formData.append("id", product.id);
     formData.append("name", product.name);
     formData.append("description", product.description);
-    formData.append("category", product.category._id);
+  //  formData.append("category", product.category._id);
     formData.append("stock", product.stock);
     formData.append("price", product.price);
     formData.append("image", product.image);
