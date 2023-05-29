@@ -4,9 +4,11 @@ import apiURL from "./config";
 export const getProducts = async () => {
     try {
         let res = await axios.get(`${apiURL}/api/products/listProducts`);
+        console.log(res.data); // Check the response data
         return res.data;
     } catch (error) {
-        console.log(error);
+        console.log("An error occurred while fetching products:", error);
+        throw(error);
     }
 };
 

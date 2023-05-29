@@ -15,12 +15,12 @@ function AllProduct(props){
 
     useEffect(() => {
         fetchData();
-    })
+    }, [])
 
     const fetchData = async () => {
         let resData = await getProducts();
         setTimeout(() => {
-            if (resData & resData.Products) {
+            if (resData && resData.Products) {
                 dispatch({
                     type: "fetchProductsChangeState",
                     payload: resData.Products,
@@ -91,7 +91,7 @@ function AllProduct(props){
             <Fragment>
                 <tr>
                     <td>
-                        {product.name.length > 15 ? product.Description.subString(1,15) + "..."
+                        {product.name.length > 15 ? product.Description.substring(1,15) + "..."
                         : product.name}
                     </td>
                     <td>

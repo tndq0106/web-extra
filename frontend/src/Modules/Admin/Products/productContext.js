@@ -15,7 +15,7 @@ export const productState = {
 
 export const productReducer = (state, action) => {
     switch (action.type) {
-        case "fetchProudctsAndChangeState":
+        case "fetchProductsAndChangeState":
             return{
                 ...state,
                 products: action.payload,
